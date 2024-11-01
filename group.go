@@ -210,6 +210,21 @@ func (g *Group) Init() tea.Cmd {
 		return tea.Batch(cmds...)
 	}
 
+	if g.initialField != 0 {
+		current := g.selector.Index()
+		if g.initialField != current {
+			if g.initialField > current {
+				for i := 0; i < g.initialField-current; i++ {
+					cmds = append(cmds, g.nextField()...)
+				}
+			} else {
+				for i := 0; i < current-g.initialField; i++ {
+					cmds = append(cmds, g.prevField()...)
+				}
+			}
+		}
+	}
+
 	if g.active {
 		cmd := g.selector.Selected().Focus()
 		cmds = append(cmds, cmd)
