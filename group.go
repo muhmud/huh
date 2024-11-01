@@ -1,6 +1,7 @@
 package huh
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -35,11 +36,12 @@ type Group struct {
 	showErrors bool
 
 	// group options
-	width  int
-	height int
-	keymap *KeyMap
-	hide   func() bool
-	active bool
+	width        int
+	height       int
+	keymap       *KeyMap
+	hide         func() bool
+	active       bool
+	initialField int
 }
 
 // NewGroup returns a new group with the given fields.
@@ -145,6 +147,15 @@ func (g *Group) WithHideFunc(hideFunc func() bool) *Group {
 	return g
 }
 
+// WithInitialField sets the field that should be initially focused
+func (g *Group) WithInitialField(index int) error {
+	if index >= g.selector.Total() {
+		return errors.New("field index out of bounds")
+	}
+	g.initialField = index
+	return nil
+}
+
 // Errors returns the groups' fields' errors.
 func (g *Group) Errors() []error {
 	var errs []error
@@ -199,7 +210,6 @@ func (g *Group) Init() tea.Cmd {
 		return tea.Batch(cmds...)
 	}
 
-	cmds = append(cmds, g.nextField()...)
 	if g.active {
 		cmd := g.selector.Selected().Focus()
 		cmds = append(cmds, cmd)
