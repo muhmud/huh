@@ -199,7 +199,7 @@ func (g *Group) Init() tea.Cmd {
 		return tea.Batch(cmds...)
 	}
 
-	g.selector.Next()
+	cmds = append(cmds, g.nextField()...)
 	if g.active {
 		cmd := g.selector.Selected().Focus()
 		cmds = append(cmds, cmd)
