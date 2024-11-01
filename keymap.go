@@ -64,6 +64,8 @@ type MultiSelectKeyMap struct {
 	Filter       key.Binding
 	SetFilter    key.Binding
 	ClearFilter  key.Binding
+	SelectedOnly key.Binding
+	SelectedAll  key.Binding
 	Submit       key.Binding
 	SelectAll    key.Binding
 	SelectNone   key.Binding
@@ -162,6 +164,8 @@ func NewDefaultKeyMap() *KeyMap {
 			Filter:       key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "filter")),
 			SetFilter:    key.NewBinding(key.WithKeys("enter", "esc"), key.WithHelp("esc", "set filter"), key.WithDisabled()),
 			ClearFilter:  key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "clear filter"), key.WithDisabled()),
+			SelectedOnly: key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "selected")),
+			SelectedAll:  key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "all"), key.WithDisabled()),
 			HalfPageUp:   key.NewBinding(key.WithKeys("ctrl+u"), key.WithHelp("ctrl+u", "½ page up")),
 			HalfPageDown: key.NewBinding(key.WithKeys("ctrl+d"), key.WithHelp("ctrl+d", "½ page down")),
 			GotoTop:      key.NewBinding(key.WithKeys("home", "g"), key.WithHelp("g/home", "go to start")),

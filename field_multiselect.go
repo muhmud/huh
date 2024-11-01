@@ -34,12 +34,15 @@ type MultiSelect[T comparable] struct {
 	err      error
 
 	// state
-	cursor    int
-	focused   bool
-	filtering bool
-	filter    textinput.Model
-	viewport  viewport.Model
-	spinner   spinner.Model
+	cursor          int
+	focused         bool
+	filtering       bool
+	filter          textinput.Model
+	selectedOnly    bool
+	selectedCursor  int
+	selectedYOffset int
+	viewport        viewport.Model
+	spinner         spinner.Model
 
 	// options
 	width      int
@@ -233,6 +236,8 @@ func (m *MultiSelect[T]) KeyBinds() []key.Binding {
 			m.keymap.Filter,
 			m.keymap.SetFilter,
 			m.keymap.ClearFilter,
+			m.keymap.SelectedOnly,
+			m.keymap.SelectedAll,
 		)
 	}
 	binds = append(
@@ -415,6 +420,34 @@ func (m *MultiSelect[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.setSelectAllHelp()
 			m.updateValue()
+		case key.Matches(msg, m.keymap.SelectedOnly):
+			m.selectedOnly = true
+			m.filteredOptions = nil
+			for _, option := range m.options.val {
+				if m.filterFunc(option.Key) {
+					if option.selected {
+						m.filteredOptions = append(m.filteredOptions, option)
+					}
+				}
+			}
+			m.keymap.SelectedOnly.SetEnabled(false)
+			m.keymap.SelectedAll.SetEnabled(true)
+			m.selectedCursor = m.cursor
+			m.selectedYOffset = m.viewport.YOffset
+			m.cursor = 0
+			m.viewport.GotoTop()
+		case key.Matches(msg, m.keymap.SelectedAll):
+			m.selectedOnly = false
+			m.filteredOptions = nil
+			for _, option := range m.options.val {
+				if m.filterFunc(option.Key) {
+					m.filteredOptions = append(m.filteredOptions, option)
+				}
+			}
+			m.keymap.SelectedOnly.SetEnabled(true)
+			m.keymap.SelectedAll.SetEnabled(false)
+			m.cursor = m.selectedCursor
+			m.viewport.SetYOffset(m.selectedYOffset)
 		case key.Matches(msg, m.keymap.Prev):
 			m.updateValue()
 			m.err = m.validate(m.accessor.Get())
@@ -437,7 +470,9 @@ func (m *MultiSelect[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.filteredOptions = nil
 				for _, option := range m.options.val {
 					if m.filterFunc(option.Key) {
-						m.filteredOptions = append(m.filteredOptions, option)
+						if !m.selectedOnly || option.selected {
+							m.filteredOptions = append(m.filteredOptions, option)
+						}
 					}
 				}
 			}

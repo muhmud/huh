@@ -147,8 +147,8 @@ func (g *Group) WithHideFunc(hideFunc func() bool) *Group {
 	return g
 }
 
-// WithInitialField sets the field that should be initially focused
-func (g *Group) WithInitialField(index int) error {
+// SetFocusedField sets the field that should be initially focused
+func (g *Group) SetFocusedField(index int) error {
 	if index >= g.selector.Total() {
 		return errors.New("field index out of bounds")
 	}
